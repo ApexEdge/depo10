@@ -1,0 +1,155 @@
+---
+---
+<div class="charts-container">
+  <div class="chart-card">
+    <h3>Évolution des évaluations</h3>
+    <canvas id="ratingsChart"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>Distribution des notes</h3>
+    <canvas id="distributionChart"></canvas>
+  </div>
+</div>
+
+<style>
+  .charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .chart-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .chart-card h3 {
+    margin-bottom: 1rem;
+    color: #1e293b;
+  }
+
+  canvas {
+    width: 100% !important;
+    height: 300px !important;
+  }
+
+  @media (max-width: 768px) {
+    .charts-container {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  import { Chart, registerables } from 'chart.js';
+  Chart.register(...registerables);
+
+  async function createRatingsChart(data) {
+    const ctx = document.getElementById('ratingsChart') as HTMLCanvasElement;
+    if (!ctx) return;
+
+    // Destroy existing chart if it exists
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+      existingChart.destroy();
+    }
+    
+    const last6Months = Array.from({length: 6}, (_, i) => {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      return d.toLocaleDateString('fr-FR', { month: 'short' });
+    }).reverse();
+
+    return new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: last6Months,
+        datasets: [{
+          label: 'Nombre d\'évaluations',
+          data: [12, 19, 15, 25, 22, 30],
+          borderColor: '#2563eb',
+          tension: 0.4,
+          fill: true,
+          backgroundColor: 'rgba(37, 99, 235, 0.1)',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 5
+            }
+          }
+        }
+      }
+    });
+  }
+
+  async function createDistributionChart(data) {
+    const ctx = document.getElementById('distributionChart') as HTMLCanvasElement;
+    if (!ctx) return;
+
+    // Destroy existing chart if it exists
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+      existingChart.destroy();
+    }
+
+    return new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['1★', '2★', '3★', '4★', '5★'],
+        datasets: [{
+          data: [2, 4, 8, 20, 16],
+          backgroundColor: [
+            '#ef4444',
+            '#f97316',
+            '#facc15',
+            '#84cc16',
+            '#22c55e'
+          ],
+          borderRadius: 8,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 5
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Initialize charts when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      createRatingsChart([]);
+      createDistributionChart([]);
+    });
+  } else {
+    createRatingsChart([]);
+    createDistributionChart([]);
+  }
+</script>

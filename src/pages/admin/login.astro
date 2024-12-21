@@ -1,0 +1,265 @@
+---
+import Footer from '../../components/Footer.astro';
+---
+
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Admin Login</title>
+</head>
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="brand">
+      <div class="google-style-logo">
+        <span class="letter-g">R</span>
+        <span class="letter-o1">a</span>
+        <span class="letter-o2">t</span>
+        <span class="letter-g2">i</span>
+        <span class="letter-l">n</span>
+        <span class="letter-e">g</span>
+      </div>
+      <h1>Connexion à l'administration</h1>
+      <div class="brand-subtitle">Espace administrateur sécurisé</div>
+    </div>
+    <form class="login-form" id="loginForm">
+      <div class="input-group">
+        <input type="text" id="username" required>
+        <label for="username">Identifiant</label>
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" required>
+        <label for="password">Mot de passe</label>
+      </div>
+      <div class="forgot-section">
+        <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+      </div>
+      <div class="button-group">
+        <button type="submit">Se connecter</button>
+      </div>
+      <p id="errorMessage" class="error hidden">Identifiants incorrects</p>
+    </form>
+  </div>
+  <Footer />
+</div>
+
+<style is:global>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .login-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #f1f3f4;
+    padding: 1rem;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 450px;
+    margin: auto;
+    padding: 48px 40px 36px;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .google-style-logo {
+    display: flex;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+
+  .google-style-logo span {
+    display: inline-block;
+  }
+
+  .letter-g { color: #4285f4; }
+  .letter-o1 { color: #ea4335; }
+  .letter-o2 { color: #fbbc05; }
+  .letter-g2 { color: #4285f4; }
+  .letter-l { color: #34a853; }
+  .letter-e { color: #ea4335; }
+
+  .brand {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .brand h1 {
+    font-size: 24px;
+    color: #202124;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .brand-subtitle {
+    margin-top: 8px;
+    color: #202124;
+    font-size: 16px;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  input {
+    width: 100%;
+    height: 54px;
+    padding: 13px 15px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #202124;
+    transition: all 0.2s;
+    background: transparent;
+  }
+
+  input::placeholder {
+    color: transparent;
+  }
+
+  label {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    padding: 0 4px;
+    color: #5f6368;
+    font-size: 16px;
+    transition: all 0.2s;
+    pointer-events: none;
+  }
+
+  input:focus,
+  input:not(:placeholder-shown) {
+    border-color: #1a73e8;
+    outline: none;
+  }
+
+  input:focus + label,
+  input:not(:placeholder-shown) + label {
+    top: 0;
+    font-size: 13px;
+    color: #1a73e8;
+  }
+
+  .forgot-section {
+    text-align: right;
+    margin: 8px 0 24px;
+  }
+
+  .forgot-link {
+    color: #1a73e8;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 14px;
+  }
+
+  .forgot-link:hover {
+    text-decoration: underline;
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  button {
+    background: #1a73e8;
+    color: white;
+    padding: 0 24px;
+    height: 42px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 120px;
+  }
+
+  button:hover {
+    background: #1557b0;
+    box-shadow: 0 1px 2px rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+  }
+
+  .error {
+    color: #d93025;
+    font-size: 13px;
+    margin-top: 16px;
+    text-align: center;
+    display: none;
+  }
+
+  .error.visible {
+    display: block;
+  }
+
+  @media (max-width: 480px) {
+    .login-container {
+      padding: 1rem;
+      background: #fff;
+    }
+
+    .login-card {
+      padding: 32px 24px;
+      border: none;
+      box-shadow: none;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    const errorMessage = document.getElementById('errorMessage');
+
+    const validUsers = [
+      { username: 'alexis.besner1@gmail.com', password: 'Bonjour1234' },
+      { username: 'j.ebongue@avocats-ebongue.ca', password: 'Bonjour1234' }
+    ];
+
+    loginForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = (document.getElementById('username') as HTMLInputElement).value;
+      const password = (document.getElementById('password') as HTMLInputElement).value;
+
+      const isValidUser = validUsers.some(user => 
+        user.username === username && user.password === password
+      );
+
+      if (isValidUser) {
+        sessionStorage.setItem('adminAuthenticated', 'true');
+        sessionStorage.setItem('adminUser', username);
+        setTimeout(() => {
+          window.location.href = '/admin/dashboard';
+        }, 100);
+      } else {
+        errorMessage?.classList.remove('hidden');
+      }
+    });
+  });
+</script>

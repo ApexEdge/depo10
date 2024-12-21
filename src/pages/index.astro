@@ -1,0 +1,131 @@
+---
+import Layout from '../layouts/Layout.astro';
+import StarRating from '../components/StarRating.astro';
+import Logo from '../components/Logo.astro';
+
+const WEBSITE_URL = 'https://avocats-ebongue.ca';
+const REDIRECT_URL = 'https://gorate.biz/Ebongue-Avocats';
+const CONTACT_EMAIL = 'j.ebongue@avocats-ebongue.ca';
+---
+
+<Layout title="Évaluation - Ebongue Avocats">
+  <main>
+    <div class="background-overlay"></div>
+    <div class="content-wrapper">
+      <Logo 
+        url={WEBSITE_URL}
+        imgSrc="/logo.png"
+        alt="Ebongue Avocats Logo"
+      />
+      <div class="content">
+        <h1>Partagez votre expérience</h1>
+        <p class="subtitle">Votre avis est précieux pour nous aider à améliorer nos services</p>
+        <StarRating 
+          redirectUrl={REDIRECT_URL}
+          email={CONTACT_EMAIL}
+        />
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    position: relative;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: linear-gradient(
+      rgba(0, 0, 0, 0.6),
+      rgba(0, 0, 0, 0.6)
+    ), url('/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -1;
+    opacity: 0;
+    animation: fadeInBg 0.5s ease-out 0.2s forwards;
+  }
+
+  .content-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    animation: fadeIn 0.8s ease-out;
+    z-index: 1;
+  }
+
+  .content {
+    width: 100%;
+  }
+
+  h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 2.75rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.8s ease-out 0.2s backwards;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #e2e8f0;
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.8s ease-out 0.4s backwards;
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      padding: 0 1rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      padding: 0 1rem;
+    }
+  }
+
+  @media (max-height: 700px) {
+    main {
+      padding: 2rem 1rem;
+    }
+  }
+
+  @keyframes fadeInBg {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  // Preload background image
+  window.addEventListener('load', () => {
+    const img = new Image();
+    img.src = '/background.jpg';
+  });
+</script>

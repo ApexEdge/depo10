@@ -1,0 +1,147 @@
+---
+interface Props {
+  email: string;
+}
+
+const { email } = Astro.props;
+---
+
+<div id="feedback" class="feedback">
+  <p>Nous sommes désolés que notre service n'ait pas répondu à vos attentes.</p>
+  <div id="feedbackForm">
+    <textarea 
+      id="feedbackText" 
+      placeholder="Dites-nous comment nous pouvons nous améliorer..."
+      class="feedback-textarea"
+      maxlength="500"
+    ></textarea>
+    <div class="char-count"><span id="currentCount">0</span>/500 caractères</div>
+  </div>
+  <p id="thankYouMessage" class="thank-you hidden">Merci pour votre feedback !</p>
+  <a href={`mailto:${email}`} class="contact-link">
+    Veuillez nous contacter
+  </a>
+</div>
+
+<style>
+  .feedback {
+    text-align: center;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #4a5568;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 1rem;
+    margin-top: 1rem;
+    display: none;
+  }
+
+  .feedback.visible {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .contact-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .feedback-textarea {
+    width: 100%;
+    min-height: 120px;
+    margin: 1rem 0 0.5rem;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+    background-color: #f8fafc;
+    color: #1e293b;
+  }
+
+  .feedback-textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background-color: white;
+  }
+
+  .feedback-textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  .char-count {
+    text-align: right;
+    font-size: 0.875rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .thank-you {
+    color: #059669;
+    font-weight: 500;
+    margin: 1rem 0;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.getElementById('feedbackText') as HTMLTextAreaElement;
+    const charCount = document.getElementById('currentCount');
+    const feedbackForm = document.getElementById('feedbackForm');
+    const thankYouMessage = document.getElementById('thankYouMessage');
+
+    textarea?.addEventListener('input', () => {
+      const count = textarea.value.length;
+      if (charCount) charCount.textContent = count.toString();
+      
+      // Ajoute une classe quand on approche de la limite
+      if (count > 450) {
+        charCount?.parentElement?.classList.add('near-limit');
+      } else {
+        charCount?.parentElement?.classList.remove('near-limit');
+      }
+    });
+
+    document.addEventListener('ratingSelected', (event) => {
+      const rating = (event as CustomEvent).detail.rating;
+      const feedback = document.getElementById('feedback');
+      
+      if (rating <= 4) {
+        feedback?.classList.add('visible');
+      } else {
+        feedback?.classList.remove('visible');
+      }
+    });
+
+    document.addEventListener('feedbackSent', () => {
+      if (feedbackForm && thankYouMessage) {
+        feedbackForm.classList.add('hidden');
+        thankYouMessage.classList.remove('hidden');
+      }
+    });
+  });
+</script>

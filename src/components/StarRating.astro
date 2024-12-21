@@ -1,0 +1,240 @@
+---
+import StarIcon from './StarIcon.astro';
+import FeedbackMessage from './FeedbackMessage.astro';
+import SubmitButton from './SubmitButton.astro';
+import Footer from './Footer.astro';
+import QuestionMarkButton from './QuestionMarkButton.astro';
+import { supabase } from '../utils/supabase';
+
+interface Props {
+  redirectUrl: string;
+  email: string;
+}
+
+const { redirectUrl, email } = Astro.props;
+---
+
+<div class="wrapper">
+  <QuestionMarkButton />
+  <div class="star-rating">
+    <div class="stars">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button class="star" data-value={star} aria-label={`${star} étoiles`}>
+          <StarIcon size={36} />
+        </button>
+      ))}
+    </div>
+    <FeedbackMessage email={email} />
+    <SubmitButton />
+  </div>
+  <Footer />
+</div>
+
+<style>
+  .wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-top: 2rem; /* Réduit de 2rem */
+  }
+
+  .star-rating {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
+    max-width: 600px;
+    margin: 0 auto; /* Changé de 2rem auto à 0 auto */
+    animation: scaleIn 0.6s ease-out;
+  }
+
+  .stars {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .star {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0.75rem;
+    border-radius: 50%;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+  }
+
+  /* Increase touch target size */
+  .star::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+  }
+
+  @media (hover: hover) {
+    .star:hover {
+      transform: scale(1.15);
+    }
+  }
+
+  .star.active :global(.star-icon) {
+    fill: #ffd700;
+    stroke: #b8860b;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+  }
+
+  @media (max-width: 768px) {
+    .wrapper {
+      padding-top: 1rem; /* Ajouté pour mobile */
+    }
+
+    .star-rating {
+      margin: 0 1rem; /* Changé de 1rem à 0 1rem */
+    }
+
+    .stars {
+      gap: 0.25rem;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .stars {
+      transform: scale(0.9);
+    }
+  }
+</style>
+
+<script define:vars={{ redirectUrl }}>
+  const stars = document.querySelectorAll('.star');
+  const feedback = document.getElementById('feedback');
+  const submitButton = document.getElementById('submitButton');
+  let currentRating = 0;
+  let isFeedbackSent = false;
+
+  // Add listener for feedbackSent event
+  document.addEventListener('feedbackSent', () => {
+    isFeedbackSent = true;
+    // Disable all star buttons
+    stars.forEach(star => {
+      star.style.pointerEvents = 'none';
+      star.style.opacity = '0.7';
+    });
+  });
+
+  function updateStars(value, permanent = false) {
+    // Ne rien faire si le feedback a déjà été envoyé
+    if (isFeedbackSent) return;
+    
+    stars.forEach((s, index) => {
+      if (index < value) {
+        s.classList.add('active');
+      } else {
+        s.classList.remove('active');
+      }
+    });
+
+    if (permanent) {
+      currentRating = value;
+      // Dispatch custom event
+      document.dispatchEvent(new CustomEvent('ratingSelected', {
+        detail: { rating: value }
+      }));
+
+      if (currentRating <= 4) {
+        feedback?.classList.remove('hidden');
+        submitButton?.classList.add('hidden');
+      } else {
+        feedback?.classList.add('hidden');
+        submitButton?.classList.remove('hidden');
+      }
+    }
+  }
+
+  // Improved touch handling
+  stars.forEach(star => {
+    // Handle both click and touch events
+    const handleInteraction = (e) => {
+      e.preventDefault(); // Prevent any default behavior
+      const value = parseInt(star.getAttribute('data-value') || '0');
+      updateStars(value, true);
+    };
+
+    // Add touch event listeners
+    star.addEventListener('touchstart', handleInteraction, { passive: false });
+    
+    // Keep click for non-touch devices
+    star.addEventListener('click', handleInteraction);
+
+    // Only add hover effects for non-touch devices
+    if (window.matchMedia('(hover: hover)').matches) {
+      star.addEventListener('mouseenter', () => {
+        const value = parseInt(star.getAttribute('data-value') || '0');
+        updateStars(value);
+      });
+
+      star.addEventListener('mouseleave', () => {
+        updateStars(currentRating);
+      });
+    }
+  });
+
+  async function submitRating(rating, comment = '') {
+    try {
+      console.log('Submitting new rating to Supabase:', { rating, comment });
+      
+      const { data, error } = await supabase
+        .from('ratings')
+        .insert([
+          { 
+            rating: rating,
+            comment: comment,
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select();
+
+      if (error) {
+        console.error('Supabase insert error:', error);
+        throw error;
+      }
+      
+      console.log('Rating submitted successfully:', data);
+
+      // Dispatch global event for dashboard update
+      const event = new CustomEvent('ratingUpdated', {
+        bubbles: true,
+        composed: true,
+        detail: data[0]
+      });
+      window.dispatchEvent(event);
+
+      if (rating === 5) {
+        setTimeout(() => window.location.href = redirectUrl, 1000);
+      } else {
+        alert('Merci pour votre avis');
+      }
+    } catch (error) {
+      console.error('Rating submission failed:', error);
+      alert('Une erreur est survenue lors de l\'envoi de votre évaluation');
+    }
+  }
+
+  // Update submit button handler
+  submitButton?.addEventListener('click', () => {
+    if (currentRating > 0) {
+      const comment = document.querySelector('textarea')?.value || '';
+      submitRating(currentRating, comment);
+    }
+  });
+</script>

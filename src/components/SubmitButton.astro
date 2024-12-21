@@ -1,0 +1,105 @@
+---
+---
+
+<button id="submitButton" class="submit-button hidden">
+  Soumettre votre avis
+</button>
+
+<button id="feedbackButton" class="submit-button feedback-button hidden">
+  Soumettre votre avis
+</button>
+
+<style>
+  .submit-button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+  }
+
+  .submit-button:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(37, 99, 235, 0.3);
+  }
+
+  .feedback-button {
+    background: #4b5563;
+  }
+
+  .feedback-button:hover {
+    background: #374151;
+  }
+
+  .hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  const submitButton = document.getElementById('submitButton');
+  const feedbackButton = document.getElementById('feedbackButton');
+  const feedback = document.getElementById('feedback');
+  let currentRating = 0;
+
+  // Listen for custom event from StarRating
+  document.addEventListener('ratingSelected', (event) => {
+    const rating = (event as CustomEvent).detail.rating;
+    currentRating = rating;
+    
+    if (rating <= 4) {
+      submitButton?.classList.add('hidden');
+      feedbackButton?.classList.remove('hidden');
+      feedback?.classList.add('hidden');
+    } else {
+      feedbackButton?.classList.add('hidden');
+      submitButton?.classList.remove('hidden');
+      feedback?.classList.add('hidden');
+    }
+  });
+
+  async function sendFeedbackEmail(rating) {
+    try {
+      const feedbackText = document.querySelector('textarea')?.value || '';
+      const response = await fetch('/api/send-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating,
+          feedback: feedbackText
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to send feedback email');
+      }
+    } catch (error) {
+      console.error('Error sending feedback:', error);
+    }
+  }
+
+  feedbackButton?.addEventListener('click', () => {
+    feedback?.classList.remove('hidden');
+    feedbackButton?.classList.add('hidden');
+    document.dispatchEvent(new CustomEvent('feedbackSent'));
+    sendFeedbackEmail(currentRating);
+  });
+
+  submitButton?.addEventListener('click', () => {
+    if (currentRating <= 4) {
+      alert('Merci pour votre avis');
+    } else {
+      console.log('Rating submitted');
+      sendFeedbackEmail(currentRating);
+    }
+    submitButton?.classList.add('hidden');
+  });
+</script>
