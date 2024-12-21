@@ -17,7 +17,7 @@ interface EmailOptions {
   }>;
 }
 
-const resend = new Resend('re_GPqm8uUT_Bm6UVFJCk3b7CDs6W2omSEvD');
+const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
 const DEFAULT_FROM = 'Ebongue Avocats <onboarding@resend.dev>';
 const DEFAULT_TO = 'alexis.besner1@gmail.com';
@@ -33,6 +33,8 @@ export async function sendEmail({
       throw new Error('Missing RESEND_API_KEY environment variable');
     }
 
+    console.log('Attempting to send email with data:', { subject, content, replyTo, attachments });
+
     const data = await resend.emails.send({
       from: DEFAULT_FROM,
       to: DEFAULT_TO,
@@ -40,9 +42,13 @@ export async function sendEmail({
       subject: subject,
       html: content,
       attachments: attachments,
+      headers: {
+        'X-Entity-Ref-ID': new Date().getTime().toString(),
+      },
       tags: [{ name: 'category', value: 'contact_form' }]
     });
 
+    console.log('Email sent successfully:', data);
     return { success: true, data };
   } catch (error) {
     console.error('Email sending failed:', error);
